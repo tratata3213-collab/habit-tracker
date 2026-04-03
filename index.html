@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Habit Tracker</title>
+</head>
+<body>
+    <h1>My Day Tracker</h1>
+
+    <h3>Настроение:</h3>
+    <button onclick="setMood('good')">😄</button>
+    <button onclick="setMood('ok')">😐</button>
+    <button onclick="setMood('bad')">😢</button>
+
+    <h3>Активности:</h3>
+    <label><input type="checkbox" value="study"> Учился</label><br>
+    <label><input type="checkbox" value="sport"> Спорт</label><br>
+    <label><input type="checkbox" value="rest"> Отдых</label><br>
+
+    <br><br>
+    <button onclick="save()">Сохранить</button>
+
+    <h3>История:</h3>
+    <ul id="logs"></ul>
+
+<script>
+let mood = "ok";
+
+function setMood(m) {
+    mood = m;
+}
+
+async function save() {
+    const activities = Array.from(document.querySelectorAll("input:checked"))
+        .map(el => el.value);
+
+    await fetch("/add", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ mood, activities })
+    });
+
+    loadLogs();
+}
+
+async function loadLogs() {
+    const res = await fetch("/logs");
+    const data = await res.json();
+
+    const list = document.getElementById("logs");
+    list.innerHTML = "";
+
+    data.reverse().forEach(item => {
+        const li = document.createElement("li");
+        li.innerText = `${item.date} | ${item.mood} | ${item.activities.join(", ")}`;
+        list.appendChild(li);
+    });
+}
+
+loadLogs();
+</script>
+</body>
+</html>
