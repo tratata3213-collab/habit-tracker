@@ -34,6 +34,7 @@ def add_entry():
     score = len(activities)
 
     new_entry = {
+        "id": len(data) + 1,
         "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "mood": request.json.get("mood"),
         "activities": activities,
@@ -44,11 +45,35 @@ def add_entry():
     save_data(data)
 
     return jsonify({"status": "saved"})
+    
+@app.route("/edit/<int:item_id>", methods=["POST"])
+def edit_item(item_id):
+    data = load_data()
+
+    for d in data:
+        if d["id"] == item_id:
+            d["mood"] = request.json.get("mood", d["mood"])
+            d["activities"] = request.json.get("activities", d["activities"])
+            d["score"] = len(d["activities"])
+
+    save_data(data)
+
+    return {"status": "updated"}
 
 
 @app.route("/logs", methods=["GET"])
 def get_logs():
     return jsonify(load_data())
+    
+@app.route("/delete/<int:item_id>", methods=["POST"])
+def delete_item(item_id):
+    data = load_data()
+
+    data = [d for d in data if d["id"] != item_id]
+
+    save_data(data)
+
+    return {"status": "deleted"}
 
 
 @app.route("/stats")
@@ -65,6 +90,11 @@ def stats():
 
 
 import os
+
+@app.route("/clear", methods=["POST"])
+def clear_data():
+    save_data([])
+    return {"status": "cleared"}
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

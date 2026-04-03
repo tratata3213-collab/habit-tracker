@@ -22,16 +22,15 @@ h1 {
     border-radius: 16px;
     padding: 20px;
     margin: 20px auto;
-    width: 320px;
+    width: 340px;
 }
 
 button {
     border: none;
-    padding: 10px 15px;
+    padding: 8px 12px;
     margin: 5px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 18px;
     transition: 0.2s;
 }
 
@@ -46,13 +45,26 @@ button:hover {
 .save-btn {
     background: #00b894;
     color: white;
-    font-size: 16px;
-    margin-top: 15px;
+}
+
+.delete-btn {
+    background: #d63031;
+    color: white;
+}
+
+.edit-btn {
+    background: #0984e3;
+    color: white;
+}
+
+.clear-btn {
+    background: #e17055;
+    color: white;
 }
 
 .logs {
     text-align: left;
-    max-height: 200px;
+    max-height: 250px;
     overflow-y: auto;
 }
 
@@ -64,9 +76,14 @@ button:hover {
 }
 
 .stats {
+    font-size: 14px;
+    opacity: 0.85;
+}
+
+#status {
     margin-top: 10px;
     font-size: 14px;
-    opacity: 0.8;
+    color: #55efc4;
 }
 </style>
 </head>
@@ -92,6 +109,7 @@ button:hover {
     <label><input type="checkbox" value="rest"> 🎮 Отдых</label><br>
 
     <button class="save-btn" onclick="save()">💾 Сохранить</button>
+    <button class="clear-btn" onclick="clearData()">🗑️ Очистить всё</button>
 
     <div id="status"></div>
 </div>
@@ -144,8 +162,14 @@ async function loadLogs() {
         const div = document.createElement("div");
         div.className = "log-item";
 
-        div.innerText =
-            `${item.date} | ${item.mood} | ${item.activities.join(", ")} | score: ${item.score}`;
+        div.innerHTML = `
+            <b>#${item.id}</b> | ${item.date} | ${item.mood} 
+            | ${item.activities.join(", ")} 
+            | score: ${item.score}
+            <br>
+            <button class="delete-btn" onclick="deleteItem(${item.id})">❌</button>
+            <button class="edit-btn" onclick="editItem(${item.id})">✏️</button>
+        `;
 
         logs.appendChild(div);
     });
@@ -157,6 +181,41 @@ async function loadStats() {
 
     document.getElementById("stats").innerText =
         `Всего дней: ${data.total_days}, хороших дней: ${data.good_days}`;
+}
+
+async function deleteItem(id) {
+    if (!confirm("Удалить запись?")) return;
+
+    await fetch(`/delete/${id}`, { method: "POST" });
+
+    loadLogs();
+    loadStats();
+}
+
+async function editItem(id) {
+    const newMood = prompt("Новое настроение (good / ok / bad):");
+
+    if (!newMood) return;
+
+    await fetch(`/edit/${id}`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ mood: newMood })
+    });
+
+    loadLogs();
+    loadStats();
+}
+
+async function clearData() {
+    if (!confirm("Удалить ВСЮ историю?")) return;
+
+    await fetch("/clear", { method: "POST" });
+
+    loadLogs();
+    loadStats();
+
+    document.getElementById("status").innerText = "🗑️ История очищена";
 }
 
 loadLogs();
