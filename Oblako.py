@@ -6,7 +6,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return send_from_directory(".", "index.html")
+    with open("index.html", encoding="utf-8") as f:
+        return f.read()
 
 
 DATA_FILE = "data.json"
