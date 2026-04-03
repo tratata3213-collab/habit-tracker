@@ -1,26 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
     <title>Habit Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e2f, #2c2c54);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px auto;
+            width: 300px;
+            backdrop-filter: blur(10px);
+        }
+
+        button {
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .mood button {
+            font-size: 24px;
+        }
+
+        .save-btn {
+            background: #6c5ce7;
+            color: white;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        .save-btn:hover {
+            background: #4834d4;
+        }
+
+        .logs {
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            background: rgba(255,255,255,0.1);
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>My Day Tracker</h1>
 
-    <h3>Настроение:</h3>
-    <button onclick="setMood('good')">😄</button>
-    <button onclick="setMood('ok')">😐</button>
-    <button onclick="setMood('bad')">😢</button>
+    <h1>🌟 My Day Tracker</h1>
 
-    <h3>Активности:</h3>
-    <label><input type="checkbox" value="study"> Учился</label><br>
-    <label><input type="checkbox" value="sport"> Спорт</label><br>
-    <label><input type="checkbox" value="rest"> Отдых</label><br>
+    <div class="card">
+        <h3>Настроение</h3>
+        <div class="mood">
+            <button onclick="setMood('good')">😄</button>
+            <button onclick="setMood('ok')">😐</button>
+            <button onclick="setMood('bad')">😢</button>
+        </div>
+    </div>
 
-    <br><br>
-    <button onclick="save()">Сохранить</button>
+    <div class="card">
+        <h3>Активности</h3>
+        <label><input type="checkbox" value="study"> 📚 Учился</label><br>
+        <label><input type="checkbox" value="sport"> 💪 Спорт</label><br>
+        <label><input type="checkbox" value="rest"> 🎮 Отдых</label><br>
 
-    <h3>История:</h3>
-    <ul id="logs"></ul>
+        <button class="save-btn" onclick="save()">💾 Сохранить</button>
+    </div>
+
+    <div class="card">
+        <h3>История</h3>
+        <div class="logs" id="logs"></div>
+    </div>
 
 <script>
 let mood = "ok";
@@ -46,17 +114,20 @@ async function loadLogs() {
     const res = await fetch("/logs");
     const data = await res.json();
 
-    const list = document.getElementById("logs");
-    list.innerHTML = "";
+    const logs = document.getElementById("logs");
+    logs.innerHTML = "";
 
     data.reverse().forEach(item => {
-        const li = document.createElement("li");
-        li.innerText = `${item.date} | ${item.mood} | ${item.activities.join(", ")}`;
-        list.appendChild(li);
+        const div = document.createElement("div");
+        div.className = "log-item";
+
+        div.innerText = `${item.date} | ${item.mood} | ${item.activities.join(", ")}`;
+        logs.appendChild(div);
     });
 }
 
 loadLogs();
 </script>
+
 </body>
 </html>
